@@ -1,6 +1,8 @@
 /**
  * @file
  * @brief Reader/Writer/State
+ *
+ * This is useless. Just experimental.
  */
 
 
@@ -31,7 +33,6 @@ export class Reader<E, R> {
   bind<A>(rhs: ((r:R) => Reader<E, A>)): Reader<E, A> {
     return new Reader(e => rhs(this.runReader(e)).runReader(e));
   }
-
 }
 
 export function reader<E, R>(fa: (e:E) => R) { return new Reader<E, R>(fa); }
