@@ -4,8 +4,14 @@
  */
 
 export interface TweenFunction {
-  f: (t: number) => number;
+  f(t: number): number;
   d: number;
+}
+
+export interface TweenListenner {
+  onStart(): void;
+  onUpdate(t: number, x: number): void;
+  onComplete(): void;
 }
 
 export class Tween {
@@ -13,28 +19,26 @@ export class Tween {
 
   constructor(
     private readonly tweener: TweenFunction,
-    private readonly onStart: () => void,
-    private readonly onUpdate: (t: number, x: number) => void,
-    private readonly onComplete: () => void) {
+    private readonly listenner: TweenListenner) {
     this.intervalid= null;
   }
 
   start(): boolean {
     if (this.intervalid != null) return false;
 
-    this.onStart();
+    this.listenner.onStart();
     const starttime = performance.now();
     this.intervalid = window.requestAnimationFrame(t => {
       const t1 = (t - starttime) / this.tweener.d;
       const t2 = (t1 > 1.0)? 1.0 : t1;
 
-      this.onUpdate(t2, this.tweener.f(t2));
+      this.listenner.onUpdate(t2, this.tweener.f(t2));
       if (t1 >= 1.0) {
         if (this.intervalid != null)
           window.cancelAnimationFrame(this.intervalid);
         this.intervalid = null;
 
-        this.onComplete();
+        this.listenner.onComplete();
       }
     });
     return true;
