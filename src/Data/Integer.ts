@@ -1,6 +1,9 @@
 /**
  * @file
  * @bried Implementation of Integer.
+ *
+ * Copyright(C) 2020, Hattori, Hiroki
+ * All rights reserved.
  */
 
 
@@ -19,11 +22,11 @@ export class Integer {
 
 /*
  * const x = Integer.floor(2.1);
- * // const y = new Integer(3.5);       <-- error
+ * // const y = new Integer(3.5);       //=> error
  *
  * function foo(): void {
  *   var z = Integer.floor(5.5);
- *   // z.value = 2;                    <-- error
+ *   // z.value = 2;                    //=> error
  * }
  */
 
