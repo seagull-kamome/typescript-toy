@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc --build tsconfig-dev.json",
+    "build": "tsc --build tsconfig.json",
     "production": "tsc --build tsconfig-prod.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
