@@ -3,22 +3,21 @@
  * @brief Variouse Tweens for Typescript.
  */
 
-export interface TweenFunction {
-  f(t: number): number;
-  d: number;
-}
+export interface EasingFunction { (t: number): number; }
 
 export interface TweenListenner {
   onStart(): void;
   onUpdate(t: number, x: number): void;
-  onComplete(): void;
+  onComplete?(): void;
 }
 
 export class Tween {
   private intervalid: number|null;
 
   constructor(
-    private readonly tweener: TweenFunction,
+    private readonly easing: EasingFunction,
+    private readonly dulation: number,
+    private readonly repeat: boolean,
     private readonly listenner: TweenListenner) {
     this.intervalid= null;
   }
@@ -29,16 +28,18 @@ export class Tween {
     this.listenner.onStart();
     const starttime = performance.now();
     this.intervalid = window.requestAnimationFrame(t => {
-      const t1 = (t - starttime) / this.tweener.d;
-      const t2 = (t1 > 1.0)? 1.0 : t1;
-
-      this.listenner.onUpdate(t2, this.tweener.f(t2));
-      if (t1 >= 1.0) {
-        if (this.intervalid != null)
+      const t1 = t - starttime;
+      if (this.repeat || t < this.duration) {
+        this.listenner.onUpdate(this.easing(t1 % this.duration / this.duration));
+      } else if (t >= this.duration) {
+        this.listenner.onUpdate(this.easing(1.0));
+        if (this.intervalid != null) {
           window.cancelAnimationFrame(this.intervalid);
-        this.intervalid = null;
+          this.intervalid = null;
+        }
 
-        this.listenner.onComplete();
+        if (this.listenner.onComplete != null)
+          this.listenner.onComplete();
       }
     });
     return true;
@@ -54,18 +55,36 @@ export class Tween {
   }
 }
 
+export const easeLinear: EasingFunction = t => t;
+
+export const easeInQuad: EasingFunction = t => t * t;
+export const easeOutQuad: EasingFunction = t => t * (2 - t);
+export const easeInOutQuad: EasingFunction = t =>
+  ((t *= 2) < 1)? (0.5 * t * t) : (0.5 * (-t * (t - 2) -1) );
+
+export const easeInCubic: EasingFunction = t => t * t * t;
+export const easeOutCubic: EasingFunction = t => --t * t * t + 1;
+export const easeInOutCubic: EasingFunction = t =>
+  ((t *= 2) < 1)? (0.5 * t * t * t) : (0.5 * (t - 2) * t * t - 2);
+
+export const easeInSinusodial: EasingFunction = t => 1 - Math.cos((t * Math.PI) / 2);
+export const easeOutSinusodial: EasingFunction = t => Math.sin((t * Math.PI) / 2);
+export const easeInOutSinusodial: EasingFunction = t => 0.5 * (1 - Math.cos(Math.PI * t));
+
+export const easeInExponential: EasingFunction = t => (t == 0)? 0 : Math.pow(1024, t - 1);
+export const easeOutExponential: EasingFunction = t => (t == 1)? 1 : 1 - Math.pow(2, -10 * t);
+export const easeInOutExponential: EasingFunction = t =>
+  (t == 0)? 0
+    : (t == 1)? 1
+    : ((t *= 2) < 1)? (0.5 * Math.pow(1024, t - 1))
+    : (0.5 * (-Math.pow(2, -10 * (t - 1)) + 2));
+
+export const easeInCircular: EasingFunction = t => 1 - Math.sqrt(1 - t * t);
+export const easeOutCircular: EasingFunction = t => Math.sqrt(1 - --t * t);
+export const easeInOutCircular: EasingFunction = t =>
+  ((t *= 2) < 1)? (-0.5 * (Math.sqrt(1 - t * t) - 1))
+    : (0.5 * Math.sqrt(1 - (t -= 2) * t) + 1);
 
 
-
-export function easeInQuad(s: number, e: number, d: number): TweenFunction {
-  return { f: t => t * e * t * t + s, d: d }; }
-export function easeOutQuad(s: number, e: number, d: number): TweenFunction {
-  return { f: t => -(t * e) * t * (t - 2) + s, d: d }; }
-export function easeInOutQuad(s: number, e: number, d: number): TweenFunction {
-  return { f: t => (t / 2 < 1) ? (t * e / 2 * t * t + s)
-                               : (-(t * e) / 2 * ((--t) * (t - 2) - 1) + s),
-           d: d }; }
-export function easeInCubic(s: number, e: number, d: number): TweenFunction {
-  return { f: t => t * e * t * t * t + s, d: d }; }
 
 
